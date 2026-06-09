@@ -5,3 +5,4 @@ Saved/
 *.sln
 *.suo
 *.user
+Tests/build/
