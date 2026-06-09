@@ -1,0 +1,24 @@
+{
+  "FileVersion": 3,
+  "Version": 1,
+  "VersionName": "1.0.0",
+  "FriendlyName": "Recipe Roulette",
+  "Description": "Each recipe gets its own scaling factor derived from the world seed, reshuffling relative efficiency every playthrough.",
+  "Category": "Gameplay",
+  "CreatedBy": "",
+  "IsBetaVersion": false,
+  "IsExperimentalVersion": false,
+  "Plugins": [
+    {
+      "Name": "SML",
+      "Enabled": true
+    }
+  ],
+  "Modules": [
+    {
+      "Name": "RecipeRoulette",
+      "Type": "Runtime",
+      "LoadingPhase": "Default"
+    }
+  ]
+}
