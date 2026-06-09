@@ -1,9 +1,9 @@
 #include "RecipeRouletteModule.h"
+#include "RecipeRouletteScaling.h"
 
 #include "FGRecipe.h"
 #include "FGGameMode.h"
 
-// Scale range — 0.25x (quarter cost/output) to 4x (quadruple cost/output)
 static constexpr float kMinScale = 0.25f;
 static constexpr float kMaxScale = 4.0f;
 
@@ -50,7 +50,7 @@ void URecipeRouletteModule::ApplyRecipeScaling()
         UFGRecipe* CDO = GetMutableDefault<UFGRecipe>(Class);
         if (!CDO) continue;
 
-        float Scale = ComputeScaleFactor(Seed, Class->GetName(), kMinScale, kMaxScale);
+        float Scale = RecipeRoulette::ComputeScaleFactor(Seed, TCHAR_TO_UTF8(*Class->GetName()), kMinScale, kMaxScale);
 
         // Scale ingredients
         TArray<FItemAmount>& Ingredients = CDO->mIngredients;
@@ -72,30 +72,3 @@ void URecipeRouletteModule::ApplyRecipeScaling()
     UE_LOG(LogTemp, Log, TEXT("RecipeRoulette: patched %d recipes (seed=%d)"), PatchedCount, RawSeed);
 }
 
-float URecipeRouletteModule::ComputeScaleFactor(uint32 Seed, const FString& RecipeName, float MinScale, float MaxScale)
-{
-    uint32 Hash = HashCombine(Seed, RecipeName);
-
-    // Normalise to [0, 1]
-    float T = static_cast<float>(Hash & 0x00FFFFFFu) / static_cast<float>(0x00FFFFFFu);
-
-    // Log-uniform mapping: equal probability of halving and doubling
-    float LogMin = FMath::Loge(MinScale);
-    float LogMax = FMath::Loge(MaxScale);
-    return FMath::Exp(LogMin + T * (LogMax - LogMin));
-}
-
-uint32 URecipeRouletteModule::HashCombine(uint32 Seed, const FString& Str)
-{
-    uint32 Hash = Seed;
-    for (TCHAR Ch : Str)
-    {
-        Hash ^= static_cast<uint32>(Ch);
-        Hash *= 0x9E3779B9u; // golden-ratio constant — good avalanche for strings
-    }
-    // Final avalanche pass
-    Hash ^= Hash >> 16;
-    Hash *= 0x45D9F3Bu;
-    Hash ^= Hash >> 16;
-    return Hash;
-}
